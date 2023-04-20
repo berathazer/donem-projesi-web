@@ -1,0 +1,11 @@
+@BASE_URL = http://localhost:8000/api
+
+
+
+POST http://localhost:8000/api/users/login
+
+Content-Type: "application/json"
+{
+    "email":"berathazer102030@hotmail.com",
+    "password":"Berat102030"
+}  
