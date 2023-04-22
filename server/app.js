@@ -7,7 +7,7 @@ import userRouter from "./router/userRouter"
 import customerRouter from "./router/customerRouter"
 import sensorRouter from "./router/sensorRouter"
 import receiptRouter from "./router/receiptRouter"
-
+import parkRouter from "./router/parkRouter"
 
 import db from "./config/db"
 
@@ -22,7 +22,7 @@ const app = express();
 //app.use(express.json()); // json verileri almak için
 app.use(bodyParser.json())
 
-app.use(express.urlencoded({ extended: true })); //tarayıcı verilerini almak için
+app.use(bodyParser.urlencoded({extended:true})); //tarayıcı verilerini almak için
 app.use(cors());
 
 
@@ -40,6 +40,8 @@ app.use("/api/customers", customerRouter);
 app.use("/api/sensors", sensorRouter);
 
 app.use("/api/receipts", receiptRouter);
+
+app.use("/api/parks", parkRouter);
 
 
 
