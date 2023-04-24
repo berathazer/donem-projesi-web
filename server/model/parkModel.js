@@ -10,6 +10,11 @@ const ParkSchema = new mongoose.Schema({
 		type:String,
 		required:true
 	},
+	receipt_id:{
+		type: mongoose.Schema.Types.ObjectId,
+		ref: "receipts",
+		default:null,
+	},
 	entry_time: {
 		type: Date,
 		default: new Date(),

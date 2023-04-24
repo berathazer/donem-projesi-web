@@ -1,15 +1,24 @@
-import React from "react";
+import React, { useState } from "react";
 import FormInput from "../components/Login/FormInput";
 import AccountCircle from "@mui/icons-material/AccountCircle";
 import LockIcon from "@mui/icons-material/Lock";
 import Button from "@mui/material/Button";
 import { useNavigate } from "react-router-dom";
+import { store } from "../stores";
 
 const LoginPage = () => {
+	const [formData, setFormData] = useState({
+		email: "",
+		password: "",
+	});
+
+	console.log(formData);
+
 	const navigate = useNavigate();
-	const loginHandler = ()=>{
-		navigate("/dashboard")
-	}
+	const loginHandler = () => {
+
+		navigate("/dashboard");
+	};
 
 	return (
 		<div className="min-w-full min-h-screen flex items-center justify-center bg-login">
@@ -23,11 +32,15 @@ const LoginPage = () => {
 
 				<div className="w-full flex flex-col gap-y-4">
 					<FormInput
+						formData={formData}
+						setFormData={setFormData}
 						type={"text"}
 						placeholder={"Mail veya kullanıcı adınızı giriniz"}
 						icon={<AccountCircle color="primary" />}
 					/>
 					<FormInput
+						formData={formData}
+						setFormData={setFormData}
 						type={"password"}
 						placeholder={"Şifrenizi giriniz"}
 						icon={<LockIcon color="primary" />}
@@ -35,7 +48,14 @@ const LoginPage = () => {
 				</div>
 
 				<div className="pt-5 w-full">
-					<Button variant="contained" onClick={loginHandler} style={{textTransform:"none"}} size="medium" color="primary" fullWidth={true}>
+					<Button
+						variant="contained"
+						onClick={loginHandler}
+						style={{ textTransform: "none" }}
+						size="medium"
+						color="primary"
+						fullWidth={true}
+					>
 						Giriş Yap
 					</Button>
 				</div>

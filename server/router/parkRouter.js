@@ -7,12 +7,14 @@ import apiMiddleware from "../middleware/apiMiddleware";
 
 const router = Router();
 
+router.get("/", [apiMiddleware], parkController.allParks);
 
+router.get("/active-parks", [apiMiddleware], parkController.activeParks);
 
-router.post("/new",parkController.createNewPark)
+router.get("/passive-parks", [apiMiddleware], parkController.passiveParks);
 
-router.post("/exit",parkController.exitThePark)
+router.post("/new", parkController.createNewPark);
 
+router.post("/exit", parkController.exitThePark);
 
-
-export default router
+export default router;

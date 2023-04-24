@@ -6,15 +6,20 @@ import authMiddleware from "../middleware/authMiddleware";
 import apiMiddleware from "../middleware/apiMiddleware";
 const router = Router();
 
+//<GET>
+router.get("/", [apiMiddleware], customerController.allCustomer);
 
-router.get("/",[apiMiddleware],customerController.allCustomer)
+router.get("/active-customers", [apiMiddleware], customerController.activeCustomers);
 
-router.get("/find",[apiMiddleware],customerController.findCustomer)
+router.get("/passive-customers", [apiMiddleware], customerController.passiveCustomers);
 
-
-
-
-router.post("/new",[authMiddleware],customerController.addCustomer);
+router.get("/find", [apiMiddleware], customerController.findCustomer);
+//</GET/>//
 
 
-export default router
+//<POST>
+router.post("/new", [authMiddleware], customerController.addCustomer);
+
+//</POST/>
+
+export default router;

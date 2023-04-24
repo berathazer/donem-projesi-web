@@ -14,7 +14,6 @@ const addCustomer = async (req, res) => {
 		const tempCustomer = await Customer.find({
 			$or: [{ TCKN: TCKN }, { email: email }, { plate: plate }],
 		});
-		console.log("tempcustomer", tempCustomer);
 
 		if (tempCustomer.length > 0) {
 			return res.json({ success: false, error: "Böyle biri zaten mevcut" });
@@ -43,13 +42,13 @@ const findCustomer = async (req, res) => {
 
 	try {
 		const plate = req.query.plate;
-    
+
 		const customer = await Customer.find(
 			{ plate: plate },
 			{
-                createdAt:0,
-                updatedAt:0,
-                __v:0
+				createdAt: 0,
+				updatedAt: 0,
+				__v: 0,
 			}
 		);
 
@@ -64,17 +63,51 @@ const findCustomer = async (req, res) => {
 };
 
 const allCustomer = async (req, res) => {
-    try {
-        
-        const customers = await Customer.find({},{});
-        return res.json({ success:true,customers: customers})
-    } catch (error) {
-        return res.json({ success: false, error: error.message});
-    }
-}
+	try {
+		const customers = await Customer.find({}, {});
+		return res.json({ success: true, customers: customers });
+	} catch (error) {
+		return res.json({ success: false, error: error.message });
+	}
+};
+
+const activeCustomers = async (req, res) => {
+	try {
+		const customers = await Customer.find({ customer_status: 1 });
+
+		if(customers.length == 0) {
+			return res.json({success: false,error:"Aktif Müşteri Kaydı Bulunamadı."})
+		}
+
+		return res.json({ success: true, activeCustomers: customers });
+
+	} catch (error) {
+		return res.json({ success: false, error: error.message });
+	}
+};
+
+const passiveCustomers = async (req, res) => {
+	try {
+		const customers = await Customer.find({ customer_status: 0 });
+
+		if(customers.length == 0) {
+			return res.json({success: false,error:"Pasif Müşteri Kaydı Bulunamadı."})
+		}
+
+		return res.json({ success: true, passiveCustomers: customers });
+
+	} catch (error) {
+		return res.json({ success: false, error: error.message });
+	}
+};
+
+
+
 export default {
 	index,
 	addCustomer,
 	findCustomer,
-    allCustomer
+	allCustomer,
+	activeCustomers,
+	passiveCustomers
 };

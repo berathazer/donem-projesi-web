@@ -5,7 +5,7 @@ const SideLink = ({ name, icon, badge = "", to }) => {
 	const [active, setActive] = useState(false);
 
 	const navigate = useNavigate();
-	console.log(active);
+
 	const navigateHandler = () => {
 		setActive(true);
 		return navigate(to);

@@ -6,15 +6,24 @@ const createNewPark = async (req, res) => {
 	try {
 		const { customerId, plate } = req.body;
 
-		const customer = await Customer.find({ plate: plate });
+		const customer = await Customer.findById(customerId);
 
-		if (customer.length == 0) {
+		if (!customer) {
 			return res.json({ success: false, error: "Bu plaka sisteme kayıtlı değil." });
 		}
 
-		const tempPark = await Park.find({ customer_id: customerId });
+		if (customer.plate != plate) {
+			return res.json({
+				success: false,
+				error: "Gönderilen Plaka Bu Kullanıcıya Ait Değil.",
+			});
+		}
 
-		if (tempPark.length > 0) {
+		const tempPark = await Park.findOne({
+			$and: [{ customer_id: customerId }, { customer_plate: plate }, { park_state: 1 }],
+		});
+
+		if (tempPark) {
 			return res.json({ success: false, error: "Bu müşteri zaten park halinde görünüyor." });
 		}
 
@@ -42,7 +51,7 @@ const exitThePark = async (req, res) => {
 	try {
 		const { plate } = req.body;
 
-		const park = await Park.findOne({ customer_plate: plate });
+		const park = await Park.findOne({ $and: [{ customer_plate: plate }, { park_state: 1 }] });
 
 		if (!park) {
 			return res.json({
@@ -59,24 +68,6 @@ const exitThePark = async (req, res) => {
 		}
 		// ÇIKIŞ İŞLEMLERİ
 
-		// park durumu 0 olucak
-		Park.findByIdAndUpdate(
-			park.id,
-			{
-				$set: {
-					park_state: 0,
-					exit_time: new Date().setUTCHours(new Date().getUTCHours() + 3),
-				},
-			},
-			{ new: true }
-		)
-			.then((updatedPark) => {
-				//şuanlık işlem yapılmasına gerek yok
-			})
-			.catch((error) => {
-				return res.json({ success: false, error: error.message });
-			});
-
 		// giriş ve çıkış arasındaki süre hesaplanarak fiş kesilecek ve fişler collectionuna kaydedilecek
 		//tr saatine dönüştürdük
 		const currentDate = new Date();
@@ -88,8 +79,8 @@ const exitThePark = async (req, res) => {
 		const hourDiff = dateDiff / 60;
 		console.log(dateDiff, hourDiff);
 
-		//bu fee değeri ilerde hesaplanarak değiştirilecek şimdilik temsili bir değer.
-		const fee = 24;
+		//bu fee değeri ilerde hesaplanarak değiştirilecek şimdilik temsili bir değer. (+)
+		const fee = process.env.INITIAL_FEE + process.env.HOURLY_FEE * hourDiff;
 
 		const newReceipt = await Receipt.create({
 			receipt_fee: fee,
@@ -98,11 +89,29 @@ const exitThePark = async (req, res) => {
 		});
 		newReceipt.save();
 
-		// müşterinin total_time,total_fee bilgileri güncellenecek ve park durumu 0 yapılacak
+		// park durumu 0 olucak ve receipt_id si güncellenecek
+		Park.findByIdAndUpdate(
+			park.id,
+			{
+				$set: {
+					park_state: 0,
+					exit_time: new Date().setUTCHours(new Date().getUTCHours() + 3),
+					receipt_id: newReceipt.id,
+				},
+			},
+			{ new: true }
+		)
+			.then((updatedPark) => {
+				//şuanlık işlem yapılmasına gerek yok
+			})
+			.catch((error) => {
+				return res.json({ success: false, error: error.message });
+			});
 
+		// müşterinin total_time,total_fee bilgileri güncellenecek
 		Customer.findByIdAndUpdate(
 			park.customer_id,
-			{ $inc: { total_park_time: dateDiff, total_fee: fee } },
+			{ $inc: { total_park_time: hourDiff, total_fee: fee } },
 			{ new: true }
 		)
 			.then((updatedCustomer) => {
@@ -121,7 +130,55 @@ const exitThePark = async (req, res) => {
 	}
 };
 
+const activeParks = async (req, res) => {
+	try {
+		const parks = await Park.find({ park_state: 1 });
+
+		if (parks.length == 0) {
+			return res.json({ success: false, error: "Otoparkta Araç Gözükmüyor." });
+		}
+
+		return res.json({ success: true, activeParks: parks, carCount: parks.length });
+	} catch (error) {
+		return res.json({ success: false, error: error.message });
+	}
+};
+
+const passiveParks = async (req, res) => {
+	try {
+		const parks = await Park.find({ park_state: 0 });
+
+		if (parks.length == 0) {
+			return res.json({ success: false, error: "Henüz Hiç Araç Çıkışı Olmamış." });
+		}
+
+		return res.json({ success: true, passiveParks: parks });
+
+	} catch (error) {
+		return res.json({ success: false, error: error.message });
+	}
+};
+
+const allParks = async (req, res) => {
+	try {
+
+		const parks = await Park.find({});
+
+		if (parks.length == 0) {
+			return res.json({ success: false, error: "Henüz Hiç Araç Girişi Olmamış." });
+		}
+
+		return res.json({ success: true, allParks: parks });
+
+	} catch (error) {
+		return res.json({ success: false, error: error.message });
+	}
+};
+
 export default {
 	createNewPark,
 	exitThePark,
+	activeParks,
+	passiveParks,
+	allParks,
 };

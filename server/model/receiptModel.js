@@ -16,6 +16,11 @@ const ReceiptSchema = new mongoose.Schema(
 			ref: "parks",
 			required: true,
 		},
+		receipt_state:{
+			type:Number,
+			default:1,
+			required: true
+		}
 	},
 	{ timestamps: true }
 );

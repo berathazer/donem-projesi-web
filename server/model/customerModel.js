@@ -36,7 +36,13 @@ const CustomerSchema = new Schema({
 	total_fee: {
 		type: Number,
 		default:0
+	},
+	customer_status: {
+		type:Number,
+		default:1,
+		required:true
 	}
+
 });
 
 CustomerSchema.set('timestamps', true);
