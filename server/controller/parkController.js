@@ -50,7 +50,7 @@ const createNewPark = async (req, res) => {
 const exitThePark = async (req, res) => {
 	try {
 		const { plate } = req.body;
-
+		console.log(plate);
 		const park = await Park.findOne({ $and: [{ customer_plate: plate }, { park_state: 1 }] });
 
 		if (!park) {
