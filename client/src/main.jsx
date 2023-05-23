@@ -3,6 +3,7 @@ import ReactDOM from "react-dom/client";
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import "./index.css";
 
+
 import { Toaster } from "react-hot-toast";
 import ProtectedRoute from "./components/ProtectedRoute";
 import LoginPage from "./pages/LoginPage";
@@ -72,6 +73,7 @@ const router = createBrowserRouter([
 		element: <div>404</div>,
 	},
 ]);
+
 
 ReactDOM.createRoot(document.getElementById("root")).render(
 	<>
