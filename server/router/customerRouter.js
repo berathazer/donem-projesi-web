@@ -19,7 +19,7 @@ router.get("/find", [apiMiddleware], customerController.findCustomer);
 
 //<POST>
 router.post("/new", [authMiddleware], customerController.addCustomer);
-
+router.post("/delete", [authMiddleware], customerController.deleteCustomer);
 //</POST/>
 
 export default router;

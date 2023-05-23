@@ -51,4 +51,8 @@ const passiveReceipts = async (req, res) => {
 
 
 
-export default {};
+export default {
+	allReceipts,
+	activeReceipts,
+	passiveReceipts
+};

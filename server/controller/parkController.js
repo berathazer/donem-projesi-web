@@ -5,9 +5,7 @@ import Receipt from "../model/receiptModel";
 const createNewPark = async (req, res) => {
 	try {
 		const { customerId, plate } = req.body;
-
 		const customer = await Customer.findById(customerId);
-
 		if (!customer) {
 			return res.json({ success: false, error: "Bu plaka sisteme kayıtlı değil." });
 		}
@@ -70,6 +68,7 @@ const exitThePark = async (req, res) => {
 
 		// giriş ve çıkış arasındaki süre hesaplanarak fiş kesilecek ve fişler collectionuna kaydedilecek
 		//tr saatine dönüştürdük
+
 		const currentDate = new Date();
 		currentDate.setUTCHours(currentDate.getUTCHours() + 3);
 
@@ -77,8 +76,7 @@ const exitThePark = async (req, res) => {
 
 		const dateDiff = Math.round((currentDate - oldDate) / (1000 * 60));
 		const hourDiff = dateDiff / 60;
-		console.log(dateDiff, hourDiff);
-
+	
 		//bu fee değeri ilerde hesaplanarak değiştirilecek şimdilik temsili bir değer. (+)
 		const fee = process.env.INITIAL_FEE + process.env.HOURLY_FEE * hourDiff;
 
@@ -129,6 +127,7 @@ const exitThePark = async (req, res) => {
 		return res.json({ success: false, error: error.message });
 	}
 };
+
 
 const activeParks = async (req, res) => {
 	try {

@@ -19,9 +19,8 @@ const app = express();
 
 
 
-//app.use(express.json()); // json verileri almak için
-app.use(bodyParser.json())
 
+app.use(bodyParser.json())
 app.use(bodyParser.urlencoded({extended:true})); //tarayıcı verilerini almak için
 app.use(cors());
 

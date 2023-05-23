@@ -1,3 +1,4 @@
+import { response } from "express";
 import Customer from "../model/customerModel";
 
 const index = (req, res) => {
@@ -6,23 +7,19 @@ const index = (req, res) => {
 
 const addCustomer = async (req, res) => {
 	try {
-		//bilgileri aldık
 		const { fullName, TCKN, email, phone, plate, currentUser } = req.body;
-
-		//bilgiler uygunsa kontrol yapıyoruz aynı kayıttan olmasın diye
 
 		const tempCustomer = await Customer.find({
 			$or: [{ TCKN: TCKN }, { email: email }, { plate: plate }],
 		});
-
 		if (tempCustomer.length > 0) {
-			return res.json({ success: false, error: "Böyle biri zaten mevcut" });
+			return res.json({ success: false, error: "Böyle bir müşteri zaten mevcut" });
 		}
 
-		//artık kaydı ekleyebiliriz.
 		const newCustomer = await Customer.create({ fullName, TCKN, email, phone, plate });
 		newCustomer.save();
 
+		//yeni kullanıcıyı döndür, isteği tamamla
 		return res.json({
 			success: true,
 			message: "Customer created successfully",
@@ -62,6 +59,29 @@ const findCustomer = async (req, res) => {
 	}
 };
 
+const deleteCustomer = async (req, res) => {
+	console.log("deleteCustomer");
+	try {
+		const { customerId } = req.body;
+		const deletedUser = await Customer.findByIdAndDelete(customerId);
+
+		if (deletedUser) {
+			return res.json({
+				success: true,
+				message: "Müşteri başarıyla silindi",
+				deletedUser: deletedUser,
+			});
+		} else {
+			return res.json({
+				success: false,
+				message: "Müşteri bulunamadı",
+			});
+		}
+	} catch (error) {
+		return res.json({ success: false, error: error.message });
+	}
+};
+
 const allCustomer = async (req, res) => {
 	try {
 		const customers = await Customer.find({}, {});
@@ -75,12 +95,11 @@ const activeCustomers = async (req, res) => {
 	try {
 		const customers = await Customer.find({ customer_status: 1 });
 
-		if(customers.length == 0) {
-			return res.json({success: false,error:"Aktif Müşteri Kaydı Bulunamadı."})
+		if (customers.length == 0) {
+			return res.json({ success: false, error: "Aktif Müşteri Kaydı Bulunamadı." });
 		}
 
 		return res.json({ success: true, activeCustomers: customers });
-
 	} catch (error) {
 		return res.json({ success: false, error: error.message });
 	}
@@ -90,24 +109,22 @@ const passiveCustomers = async (req, res) => {
 	try {
 		const customers = await Customer.find({ customer_status: 0 });
 
-		if(customers.length == 0) {
-			return res.json({success: false,error:"Pasif Müşteri Kaydı Bulunamadı."})
+		if (customers.length == 0) {
+			return res.json({ success: false, error: "Pasif Müşteri Kaydı Bulunamadı." });
 		}
 
 		return res.json({ success: true, passiveCustomers: customers });
-
 	} catch (error) {
 		return res.json({ success: false, error: error.message });
 	}
 };
 
-
-
 export default {
 	index,
 	addCustomer,
 	findCustomer,
+	deleteCustomer,
 	allCustomer,
 	activeCustomers,
-	passiveCustomers
+	passiveCustomers,
 };
