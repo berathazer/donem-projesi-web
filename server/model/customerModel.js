@@ -12,13 +12,12 @@ const CustomerSchema = new Schema({
 	},
 	email: { type: String, required: true, unique: true },
 	phone: { type: String, required: true },
-	plate: { type: String, required: true },
-	total_park_time: {type: Number, default:0 },
-	total_fee: { type: Number, default:0 },
-	customer_status: { type:Number, default:1, required:true }
-
+	plate: { type: String, required: true, unique: true },
+	total_park_time: { type: Number, default: 0 },
+	total_fee: { type: Number, default: 0 },
+	customer_status: { type: Number, default: 1, required: true },
 });
 
-CustomerSchema.set('timestamps', true);
+CustomerSchema.set("timestamps", true);
 
 export default mongoose.model("customer", CustomerSchema);

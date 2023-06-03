@@ -5,7 +5,7 @@ import "./FormInput.css";
 const FormInput = ({ placeholder, icon, type, formData, setFormData }) => {
 	return (
 		<TextField
-			id="input-with-icon-textfield"
+
 			label=""
 			placeholder={placeholder}
 			size="small"

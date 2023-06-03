@@ -132,7 +132,7 @@ const exitThePark = async (req, res) => {
 const activeParks = async (req, res) => {
 	try {
 		const parks = await Park.find({ park_state: 1 });
-
+		
 		if (parks.length == 0) {
 			return res.json({ success: false, error: "Otoparkta Araç Gözükmüyor." });
 		}

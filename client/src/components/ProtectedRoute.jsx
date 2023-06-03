@@ -1,14 +1,17 @@
 import React from "react";
 import { Navigate } from "react-router-dom";
+import { actions as userActions } from "../stores/user-store";
+import { useDispatch } from "react-redux";
+const ProtectedRoute = ({ children }) => {
+	const dispatch = useDispatch();
+	const token = localStorage.getItem("token");
 
-import { store } from "../stores";
-
-const ProtectedRoute = ({  children }) => {
-	const {user} = store.getState().user;
-	if (!user.isAuthenticated) {
+	if (token) {
+		dispatch(userActions.loginUser({ token }));
+		return children;
+	} else {
 		return <Navigate to={"/login"} replace={true} />;
 	}
-	return children;
 };
 
 export default ProtectedRoute;

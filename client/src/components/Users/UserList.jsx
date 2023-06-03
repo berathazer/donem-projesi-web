@@ -4,13 +4,15 @@ import Box from "@mui/material/Box";
 import { faker } from "@faker-js/faker";
 //import { faker } from '@faker-js/faker/locale/tr';
 import axios from "axios";
-
+import { useNavigate } from "react-router-dom";
 
 import Button from "@mui/material/Button";
 import DeleteIcon from "@mui/icons-material/Delete";
 import EditIcon from "@mui/icons-material/Edit";
+import VisibilityIcon from "@mui/icons-material/Visibility";
 
 import toast from "react-hot-toast";
+
 /*
 const rows = [
 	{
@@ -129,7 +131,9 @@ const UserList = () => {
 			width: 150,
 
 			renderCell: (params) => (
-				<span className="text-gray-500 font-semibold">{params.row.firstName}</span>
+				<span className="text-gray-500 font-semibold">
+					{params.row.firstName}
+				</span>
 			),
 		},
 		{
@@ -137,7 +141,9 @@ const UserList = () => {
 			headerName: "Last name",
 			width: 150,
 			renderCell: (params) => (
-				<span className="text-gray-500 font-semibold">{params.row.lastName}</span>
+				<span className="text-gray-500 font-semibold">
+					{params.row.lastName}
+				</span>
 			),
 		},
 		{
@@ -145,7 +151,9 @@ const UserList = () => {
 			headerName: "Plate",
 			width: 110,
 			renderCell: (params) => (
-				<span className="text-gray-500 font-semibold">{params.row.plate}</span>
+				<span className="text-gray-500 font-semibold">
+					{params.row.plate}
+				</span>
 			),
 		},
 		{
@@ -165,7 +173,8 @@ const UserList = () => {
 						Passive
 					</span>
 				),
-			valueGetter: (params) => `${params.row.firstName || ""} ${params.row.lastName || ""}`,
+			valueGetter: (params) =>
+				`${params.row.firstName || ""} ${params.row.lastName || ""}`,
 		},
 		{
 			field: "edit",
@@ -180,10 +189,10 @@ const UserList = () => {
 						style={{ width: 100, padding: 5 }}
 						color="success"
 						variant="contained"
-						startIcon={<EditIcon />}
+						startIcon={<VisibilityIcon />}
 						onClick={handleEdit}
 					>
-						Edit
+						Show
 					</Button>
 					<Button
 						style={{ width: 100, padding: 5 }}
@@ -201,10 +210,14 @@ const UserList = () => {
 
 	const [users, setUsers] = useState([]);
 	const apiKey = "29b068e5f73f77da112c8aa6435993bb";
-	const [modal,setModal] = useState(false);
+	const [modal, setModal] = useState(false);
+
+	const navigate = useNavigate();
+
 	const handleEdit = (e) => {
 		const customerId = e.target.parentElement.id;
 		console.log(customerId);
+		navigate(customerId, { replace: true });
 	};
 
 	const handleDelete = async (e) => {
@@ -213,26 +226,29 @@ const UserList = () => {
 			console.log("delete", customerId);
 
 			if (customerId != "") {
-				console.log("girdi");
-			
-				//bu token local storage'dan gelicek
-				const token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6ImJlcmF0aGF6ZXIxMDIwMzBAaG90bWFpbC5jb20iLCJyb2xlIjoiYWRtaW4iLCJpYXQiOjE2ODQ4NzI3NzcsImV4cCI6MTY4NTA4ODc3N30.fESYlxfKL2TnMkrbnjieGTsoepX7nEx2EaTUPihfQsQ"
+				const token = localStorage.getItem("token");
 
-				const response = await axios.post(BASE_URL + "/customers/delete", {
-					customerId: customerId,
-				},
-				{
-					headers:{
-						Authorization: `Bearer ${token}`
+				const response = await axios.post(
+					BASE_URL + "/customers/delete",
+					{
+						customerId: customerId,
+					},
+					{
+						headers: {
+							Authorization: `Bearer ${token}`,
+						},
 					}
-				}
 				);
 
-				console.log(response.data);
 				if (response.data.success) {
 					toast.success("Müşteri Başarıyla Silindi");
-					console.log(response.data.deletedUser);
-					setModal(!modal)
+					setUsers((prev)=>{
+						return prev.filter(user=> user.id !== customerId);
+					})
+					
+					setModal(!modal);
+				}else{
+					return toast.error(response.data?.message);
 				}
 			}
 		} catch (error) {
@@ -244,7 +260,9 @@ const UserList = () => {
 	useEffect(() => {
 		const getAllUser = async () => {
 			try {
-				const response = await axios.get(BASE_URL + "/customers?api_key=" + apiKey);
+				const response = await axios.get(
+					BASE_URL + "/customers?api_key=" + apiKey
+				);
 				if (response.data.success) {
 					const customers = response.data.customers;
 					let tempCustomers = [];
@@ -265,7 +283,7 @@ const UserList = () => {
 			}
 		};
 		getAllUser();
-	}, [modal]);
+	}, []);
 
 	return (
 		<div className="flex flex-col p-6">

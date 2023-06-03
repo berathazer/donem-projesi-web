@@ -8,9 +8,22 @@ import BusinessIcon from "@mui/icons-material/Business";
 
 import PeopleIcon from "@mui/icons-material/People";
 import PersonAddIcon from "@mui/icons-material/PersonAdd";
+import LocalParkingIcon from '@mui/icons-material/LocalParking';
+import ReceiptIcon from '@mui/icons-material/Receipt';
+
+
 import { Link } from "react-router-dom";
 
+import { useDispatch } from "react-redux";
+import {actions as userActions} from "../../stores/user-store";
+
 const SideBar = () => {
+	const dispatch = useDispatch();
+	const logoutHandler = () => {
+		localStorage.removeItem("token");
+		dispatch(userActions.logoutUser);
+	}
+
 	return (
 		<>
 			<div className="px-4 border-b border-gray-400 py-4 h-16 flex items-center">
@@ -65,23 +78,24 @@ const SideBar = () => {
 
 				<SideLink
 					icon={
-						<SpeedIcon
+						<LocalParkingIcon
 							fontSize="large"
 							className="group-hover:text-white/80 text-cyan-600"
 						/>
 					}
-					name={"Dashboard"}
+					name={"Parks"}
+					to={"/parks"}
 				/>
 
 				<SideLink
 					icon={
-						<SpeedIcon
+						<ReceiptIcon
 							fontSize="large"
 							className="group-hover:text-white/80 text-cyan-600"
 						/>
 					}
-					name={"Dashboard"}
-					badge={"New"}
+					name={"Receipts"}
+					to={"/receipts"}
 				/>
 			</div>
 
@@ -95,7 +109,7 @@ const SideBar = () => {
 						<div className="text-xs font-semibold text-muted">System Admin</div>
 					</div>
 				</div>
-				<Link  to={"/login"} replace={false} className="cursor-pointer">
+				<Link onClick={logoutHandler} to={"/login"} replace={false} className="cursor-pointer">
 					<LogoutIcon color="secondary" />
 				</Link>
 			</div>

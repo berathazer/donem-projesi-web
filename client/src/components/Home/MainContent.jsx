@@ -10,7 +10,10 @@ import RequestQuoteIcon from "@mui/icons-material/RequestQuote";
 import AreaChartComponent from "./AreaChartComponent";
 import PieChartComponent from "./PieChartComponent";
 
+import {store} from "../../stores"
+
 const MainContent = () => {
+	console.log(store.getState());
 	return (
 		<>
 		
@@ -102,6 +105,7 @@ const MainContent = () => {
 							<LinearProgress
 								variant="buffer"
 								style={{ borderRadius: 5, height: 10 }}
+								valueBuffer={100}
 								value={54}
 							/>
 						</div>

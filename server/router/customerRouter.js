@@ -13,13 +13,18 @@ router.get("/active-customers", [apiMiddleware], customerController.activeCustom
 
 router.get("/passive-customers", [apiMiddleware], customerController.passiveCustomers);
 
-router.get("/find", [apiMiddleware], customerController.findCustomer);
+router.get("/find", [apiMiddleware], customerController.findCustomerWithPlate);
+
+router.get("/find-by-id", [apiMiddleware], customerController.findCustomerWithId);
+
 //</GET/>//
 
 
 //<POST>
 router.post("/new", [authMiddleware], customerController.addCustomer);
 router.post("/delete", [authMiddleware], customerController.deleteCustomer);
+router.post("/update", [authMiddleware], customerController.updateCustomer);
+
 //</POST/>
 
 export default router;
