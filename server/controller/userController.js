@@ -17,10 +17,10 @@ const userLogin = async (req, res) => {
 	if(user.password == hashedPassword){
 		//create jwt token
 		const secret = process.env.JWT_LOGIN_SECRET_KEY;
-		const token = jwt.sign({email:user.email,role:user.role},secret,{expiresIn:60*3600})
+		const token = jwt.sign({email:user.email,fullName:user.fullName,role:user.role},secret,{expiresIn:60*3600})
 		
 		//return jwt token
-		return res.json({ success: true, token: token});
+		return res.json({ success: true, token: token , fullName: user.fullName, role: user.role});
 	}
 	
 	return res.json({ success: false, error: "Password is incorrect" });

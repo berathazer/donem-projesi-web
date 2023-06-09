@@ -23,36 +23,43 @@ const LoginPage = () => {
 	const navigate = useNavigate();
 
 	const loginHandler = async () => {
-		const response = await axios.post(BASE_URL + "/users/login", formData);
-		if (response.data.success) {
-			const token = response.data.token;
+		try {
+			const response = await axios.post(BASE_URL + "/users/login", formData);
+			if (response.data.success) {
+				const token = response.data.token;
+				localStorage.setItem("fullName", response.data.fullName);
+				//tokeni isteklerde kullanmak için localStorage'a salladık
+				localStorage.setItem("token", token);
 
-			//tokeni isteklerde kullanmak için localStorage'a salladık
-			localStorage.setItem("token", token);
+				//user stateini oluşturduk artık user authenticate oldu
+				dispatch(actions.loginUser({ token: token }));
 
-			//user stateini oluşturduk artık user authenticate oldu
-			dispatch(actions.loginUser({ token: token }));
+				toast.success("Login Success");
 
-			toast.success("Login Success");
-
-			//authenticate olan useri /dashboard sayfasına yolladım.
-			navigate("/dashboard");
-		} else {
-			return toast.error(response.data?.message || response.data?.error);
+				//authenticate olan useri /dashboard sayfasına yolladım.
+				navigate("/dashboard");
+			} else {
+				return toast.error(response.data?.message || response.data?.error);
+			}
+		} catch (error) {
+			return toast.error(error.message)
 		}
 	};
 
-	if(localStorage.getItem("token")){
-		toast.error("You have already logged in",{duration:2000});
-		return <Navigate to="/dashboard" replace={true} />
+	if (localStorage.getItem("token")) {
+		toast.error("You have already logged in", { duration: 2000 });
+		return <Navigate to="/dashboard" replace={true} />;
 	}
 	return (
 		<div className="min-w-full min-h-screen flex items-center justify-center bg-login">
 			<div className="bg-white sm:w-[450px]  rounded-lg flex flex-col items-center py-10 px-10 gap-y-4">
 				<div className="w-full text-center flex flex-col gap-y-2 pb-10">
-					<h1 className="text-[#31507d] text-2xl font-bold">Hoşgeldiniz</h1>
+					<h1 className="text-[#31507d] text-2xl font-bold">
+						Hoşgeldiniz
+					</h1>
 					<p className="text-muted font-light">
-						Hesabınıza erişmek için kimlik bilgilerinizi giriniz.
+						Hesabınıza erişmek için kimlik bilgilerinizi
+						giriniz.
 					</p>
 				</div>
 

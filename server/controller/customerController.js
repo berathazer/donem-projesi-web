@@ -85,7 +85,7 @@ const findCustomerWithId = async (req, res) => {
 };
 
 const deleteCustomer = async (req, res) => {
-	console.log("deleteCustomer");
+	
 	try {
 		const { customerId } = req.body;
 
@@ -94,7 +94,7 @@ const deleteCustomer = async (req, res) => {
 		});
 
 		const tempReceipt = await Receipt.find({
-			$and: [{ customer_id: customerId, receipt_state: 1 }],
+			$and: [{ receipt_customer_id: customerId, receipt_state: 1 }],
 		});
 
 		if (tempPark.length > 0 || tempReceipt.length > 0) {
@@ -103,14 +103,17 @@ const deleteCustomer = async (req, res) => {
 				message: "Bu müşterinin aktif park kaydı veya aktif fişi mevcut silinemez.",
 			});
 		}
-		
-		console.log(tempPark, tempReceipt);
-		const deletedUser = await Customer.findByIdAndDelete(customerId);
+
+		const deletedUser = await Customer.findByIdAndUpdate(
+			customerId,
+			{ customer_status: 0 },
+			{ new: true }
+		);
 
 		if (deletedUser) {
 			return res.json({
 				success: true,
-				message: "Müşteri başarıyla silindi",
+				message: "Müşteri başarıyla pasif hale getirildi.",
 				deletedUser: deletedUser,
 			});
 		} else {
@@ -119,6 +122,33 @@ const deleteCustomer = async (req, res) => {
 				message: "Müşteri bulunamadı",
 			});
 		}
+	} catch (error) {
+		return res.json({ success: false, error: error.message });
+	}
+};
+
+const setStatusToActive = async (req, res) => {
+	try {
+		const { customerId } = req.body;
+
+		const updatedUser = await Customer.findByIdAndUpdate(
+			customerId,
+			{ customer_status: 1 },
+			{ new: true }
+		);
+
+		if (!updatedUser) {
+			return res.json({
+				success: false,
+				message: "Müşteri bulunamadı",
+			});
+		}
+
+		return res.json({
+			success: true,
+			message: "Müşteri başarıyla aktif hale getirildi.",
+			updatedUser: updatedUser,
+		});
 	} catch (error) {
 		return res.json({ success: false, error: error.message });
 	}
@@ -207,4 +237,5 @@ export default {
 	allCustomer,
 	activeCustomers,
 	passiveCustomers,
+	setStatusToActive
 };

@@ -20,7 +20,7 @@ const BASE_URL = "http://localhost:8000/api";
 const EditUserPage = () => {
 	const { customerId } = useParams();
 	const [customer, setCustomer] = useState(null);
-
+	const navigate = useNavigate();
 	const [formData, setFormData] = useState({
 		fullName: "",
 		TCKN: "",
@@ -64,6 +64,7 @@ const EditUserPage = () => {
 
 			if (response.data.success) {
 				toast.success(response.data.message);
+				navigate("/users",{replace:true});
 				return setFormData({ ...response.data.customer });
 			}
 			toast.error(response.data.error);
@@ -71,7 +72,7 @@ const EditUserPage = () => {
 			return toast.error(error.message);
 		}
 	};
-
+	
 	return (
 		<div className="min-w-full min-h-screen flex  bg-login">
 			<div className="flex-2 flex-col relative  bg-white">
@@ -267,9 +268,7 @@ const EditUserPage = () => {
 															: false
 													}
 													color="success"
-													onChange={(
-														e
-													) => {
+													onChange={(e) => {
 														if (
 															formData.customer_status ==
 															1

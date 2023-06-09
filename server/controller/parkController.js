@@ -7,7 +7,10 @@ const createNewPark = async (req, res) => {
 		const { customerId, plate } = req.body;
 		const customer = await Customer.findById(customerId);
 		if (!customer) {
-			return res.json({ success: false, error: "Bu plaka sisteme kayıtlı değil." });
+			return res.json({
+				success: false,
+				error: "Bu plaka sisteme kayıtlı değil.",
+			});
 		}
 
 		if (customer.plate != plate) {
@@ -18,11 +21,18 @@ const createNewPark = async (req, res) => {
 		}
 
 		const tempPark = await Park.findOne({
-			$and: [{ customer_id: customerId }, { customer_plate: plate }, { park_state: 1 }],
+			$and: [
+				{ customer_id: customerId },
+				{ customer_plate: plate },
+				{ park_state: 1 },
+			],
 		});
 
 		if (tempPark) {
-			return res.json({ success: false, error: "Bu müşteri zaten park halinde görünüyor." });
+			return res.json({
+				success: false,
+				error: "Bu müşteri zaten park halinde görünüyor.",
+			});
 		}
 
 		const newPark = await Park.create({
@@ -49,7 +59,9 @@ const exitThePark = async (req, res) => {
 	try {
 		const { plate } = req.body;
 		console.log(plate);
-		const park = await Park.findOne({ $and: [{ customer_plate: plate }, { park_state: 1 }] });
+		const park = await Park.findOne({
+			$and: [{ customer_plate: plate }, { park_state: 1 }],
+		});
 
 		if (!park) {
 			return res.json({
@@ -68,7 +80,7 @@ const exitThePark = async (req, res) => {
 
 		// giriş ve çıkış arasındaki süre hesaplanarak fiş kesilecek ve fişler collectionuna kaydedilecek
 		//tr saatine dönüştürdük
-
+		/*
 		const currentDate = new Date();
 		currentDate.setUTCHours(currentDate.getUTCHours() + 3);
 
@@ -76,9 +88,27 @@ const exitThePark = async (req, res) => {
 
 		const dateDiff = Math.round((currentDate - oldDate) / (1000 * 60));
 		const hourDiff = dateDiff / 60;
-	
+
+		*/
+		const currentDate = new Date();
+
+		const oldDate = new Date(park.entry_time);
+
+		const timeDiffInMilliseconds = currentDate - oldDate;
+		const timeDiffInHours = timeDiffInMilliseconds / (1000 * 60 * 60);
+
+		// Tam saat sayısını almak için yuvarlama yapabilirsiniz
+		const roundedTimeDiffInHours = Math.round(timeDiffInHours);
+		let hourDiff = 0
+		if (roundedTimeDiffInHours <= 1){
+			hourDiff = 1
+		}else{
+			hourDiff = roundedTimeDiffInHours
+		}
 		//bu fee değeri ilerde hesaplanarak değiştirilecek şimdilik temsili bir değer. (+)
-		const fee = process.env.INITIAL_FEE + process.env.HOURLY_FEE * hourDiff;
+		const fee =
+			parseInt(process.env.INITIAL_FEE) +
+			parseInt(process.env.INITIAL_FEE) * hourDiff;
 
 		const newReceipt = await Receipt.create({
 			receipt_fee: fee,
@@ -93,7 +123,9 @@ const exitThePark = async (req, res) => {
 			{
 				$set: {
 					park_state: 0,
-					exit_time: new Date().setUTCHours(new Date().getUTCHours() + 3),
+					exit_time: new Date().setUTCHours(
+						new Date().getUTCHours() + 3
+					),
 					receipt_id: newReceipt.id,
 				},
 			},
@@ -128,13 +160,16 @@ const exitThePark = async (req, res) => {
 	}
 };
 
-
 const activeParks = async (req, res) => {
 	try {
 		const parks = await Park.find({ park_state: 1 });
-		
+
 		if (parks.length == 0) {
-			return res.json({ success: false, error: "Otoparkta Araç Gözükmüyor." });
+			return res.json({
+				success: false,
+				error: "Otoparkta Araç Gözükmüyor.",
+				carCount: 0,
+			});
 		}
 
 		return res.json({ success: true, activeParks: parks, carCount: parks.length });
@@ -148,11 +183,13 @@ const passiveParks = async (req, res) => {
 		const parks = await Park.find({ park_state: 0 });
 
 		if (parks.length == 0) {
-			return res.json({ success: false, error: "Henüz Hiç Araç Çıkışı Olmamış." });
+			return res.json({
+				success: false,
+				error: "Henüz Hiç Araç Çıkışı Olmamış.",
+			});
 		}
 
 		return res.json({ success: true, passiveParks: parks });
-
 	} catch (error) {
 		return res.json({ success: false, error: error.message });
 	}
@@ -160,15 +197,24 @@ const passiveParks = async (req, res) => {
 
 const allParks = async (req, res) => {
 	try {
-
-		const parks = await Park.find({});
+		const parks = await Park.find({})
+			.populate({
+				path: "customer_id",
+				select: "fullName TCKN",
+			})
+			.populate({
+				path: "receipt_id",
+				select: "receipt_fee",
+			});
 
 		if (parks.length == 0) {
-			return res.json({ success: false, error: "Henüz Hiç Araç Girişi Olmamış." });
+			return res.json({
+				success: false,
+				error: "Henüz Hiç Araç Girişi Olmamış.",
+			});
 		}
 
 		return res.json({ success: true, allParks: parks });
-
 	} catch (error) {
 		return res.json({ success: false, error: error.message });
 	}

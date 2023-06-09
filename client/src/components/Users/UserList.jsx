@@ -13,107 +13,18 @@ import VisibilityIcon from "@mui/icons-material/Visibility";
 
 import toast from "react-hot-toast";
 
-/*
-const rows = [
-	{
-		id: faker.datatype.number({ min: 1, max: 999999999 }),
-		lastName: faker.name.lastName(),
-		firstName: faker.name.firstName(),
-		age: faker.datatype.number({ min: 18, max: 70 }),
-		status: faker.datatype.number({ min: 0, max: 1 }),
-	},
+import IconButton from "@mui/material/IconButton";
+import PictureAsPdfIcon from "@mui/icons-material/PictureAsPdf";
+import { Tooltip } from "@mui/material";
 
-	{
-		id: faker.datatype.number({ min: 1, max: 999999999 }),
-		lastName: faker.name.lastName(),
-		firstName: faker.name.firstName(),
-		age: faker.datatype.number({ min: 18, max: 70 }),
-		status: faker.datatype.number({ min: 0, max: 1 }),
-	},
+import jsPDF from "jspdf";
+import autoTable from "jspdf-autotable";
 
-	{
-		id: faker.datatype.number({ min: 1, max: 999999999 }),
-		lastName: faker.name.lastName(),
-		firstName: faker.name.firstName(),
-		age: faker.datatype.number({ min: 18, max: 70 }),
-		status: faker.datatype.number({ min: 0, max: 1 }),
-	},
-
-	{
-		id: faker.datatype.number({ min: 1, max: 999999999 }),
-		lastName: faker.name.lastName(),
-		firstName: faker.name.firstName(),
-		age: faker.datatype.number({ min: 18, max: 70 }),
-		status: faker.datatype.number({ min: 0, max: 1 }),
-	},
-
-	{
-		id: faker.datatype.number({ min: 1, max: 999999999 }),
-		lastName: faker.name.lastName(),
-		firstName: faker.name.firstName(),
-		age: faker.datatype.number({ min: 18, max: 70 }),
-		status: faker.datatype.number({ min: 0, max: 1 }),
-	},
-
-	{
-		id: faker.datatype.number({ min: 1, max: 999999999 }),
-		lastName: faker.name.lastName(),
-		firstName: faker.name.firstName(),
-		age: faker.datatype.number({ min: 18, max: 70 }),
-		status: faker.datatype.number({ min: 0, max: 1 }),
-	},
-
-	{
-		id: faker.datatype.number({ min: 1, max: 999999999 }),
-		lastName: faker.name.lastName(),
-		firstName: faker.name.firstName(),
-		age: faker.datatype.number({ min: 18, max: 70 }),
-		status: faker.datatype.number({ min: 0, max: 1 }),
-	},
-
-	{
-		id: faker.datatype.number({ min: 1, max: 999999999 }),
-		lastName: faker.name.lastName(),
-		firstName: faker.name.firstName(),
-		age: faker.datatype.number({ min: 18, max: 70 }),
-		status: faker.datatype.number({ min: 0, max: 1 }),
-	},
-
-	{
-		id: faker.datatype.number({ min: 1, max: 999999999 }),
-		lastName: faker.name.lastName(),
-		firstName: faker.name.firstName(),
-		age: faker.datatype.number({ min: 18, max: 70 }),
-		status: faker.datatype.number({ min: 0, max: 1 }),
-	},
-
-	{
-		id: faker.datatype.number({ min: 1, max: 999999999 }),
-		lastName: faker.name.lastName(),
-		firstName: faker.name.firstName(),
-		age: faker.datatype.number({ min: 18, max: 70 }),
-		status: faker.datatype.number({ min: 0, max: 1 }),
-	},
-
-	{
-		id: faker.datatype.number({ min: 1, max: 999999999 }),
-		lastName: faker.name.lastName(),
-		firstName: faker.name.firstName(),
-		age: faker.datatype.number({ min: 18, max: 70 }),
-		status: faker.datatype.number({ min: 0, max: 1 }),
-	},
-
-	{
-		id: faker.datatype.number({ min: 1, max: 999999999 }),
-		lastName: faker.name.lastName(),
-		firstName: faker.name.firstName(),
-		age: faker.datatype.number({ min: 18, max: 70 }),
-		status: faker.datatype.number({ min: 0, max: 1 }),
-	},
-];
-*/
 
 const BASE_URL = "http://localhost:8000/api";
+const apiKey = "29b068e5f73f77da112c8aa6435993bb";
+
+
 
 const UserList = () => {
 	const columns = [
@@ -184,47 +95,57 @@ const UserList = () => {
 			sort: "desc",
 			width: 250,
 			renderCell: (params) => (
-				<div className="flex items-center gap-x-4" id={params.id}>
+				<div className="flex items-center gap-x-4" id={params.row.id}>
 					<Button
 						style={{ width: 100, padding: 5 }}
-						color="success"
+						color="primary"
 						variant="contained"
 						startIcon={<VisibilityIcon />}
 						onClick={handleEdit}
 					>
 						Show
 					</Button>
-					<Button
-						style={{ width: 100, padding: 5 }}
-						color="error"
-						variant="contained"
-						startIcon={<DeleteIcon />}
-						onClick={handleDelete}
-					>
-						Delete
-					</Button>
+					{params.row.status === 1 ? (
+						<Button
+							style={{ width: 100, padding: 5 }}
+							color="error"
+							variant="contained"
+							startIcon={<DeleteIcon />}
+							onClick={handleDelete}
+						>
+							Delete
+						</Button>
+					) : (
+						<Button
+							style={{ width: 100, padding: 5 }}
+							color="success"
+							variant="contained"
+							startIcon={<EditIcon />}
+							onClick={handleActive}
+						>
+							Active
+						</Button>
+					)}
 				</div>
 			),
 		},
 	];
 
-	const [users, setUsers] = useState([]);
-	const apiKey = "29b068e5f73f77da112c8aa6435993bb";
+	const [customers, setCustomers] = useState([]);
+
 	const [modal, setModal] = useState(false);
 
 	const navigate = useNavigate();
 
 	const handleEdit = (e) => {
 		const customerId = e.target.parentElement.id;
-		console.log(customerId);
+
 		navigate(customerId, { replace: true });
 	};
 
 	const handleDelete = async (e) => {
 		const customerId = e.target.parentElement.id;
 		try {
-			console.log("delete", customerId);
-
 			if (customerId != "") {
 				const token = localStorage.getItem("token");
 
@@ -242,13 +163,12 @@ const UserList = () => {
 
 				if (response.data.success) {
 					toast.success("Müşteri Başarıyla Silindi");
-					setUsers((prev)=>{
-						return prev.filter(user=> user.id !== customerId);
-					})
-					
+
 					setModal(!modal);
-				}else{
-					return toast.error(response.data?.message);
+				} else {
+					return toast.error(
+						response.data?.err || response.data.message
+					);
 				}
 			}
 		} catch (error) {
@@ -256,6 +176,38 @@ const UserList = () => {
 			console.error("Silme işlemi sırasında bir hata oluştu:", error);
 		}
 	};
+
+	const handleActive = async (e) => {
+		const customerId = e.target.parentElement.id;
+		try {
+			if (customerId != "") {
+				const token = localStorage.getItem("token");
+
+				const response = await axios.post(
+					BASE_URL + "/customers/set-active",
+					{
+						customerId: customerId,
+					},
+					{
+						headers: {
+							Authorization: `Bearer ${token}`,
+						},
+					}
+				);
+
+				if (response.data.success) {
+					toast.success("Müşteri Başarıyla Aktive Edildi.");
+					setModal(!modal);
+				} else {
+					return toast.error(response.data?.message);
+				}
+			}
+		} catch (error) {
+			return toast.error(error.message);
+		}
+	};
+
+
 
 	useEffect(() => {
 		const getAllUser = async () => {
@@ -273,30 +225,90 @@ const UserList = () => {
 							firstName: customer.fullName.split(" ")[0],
 							plate: customer.plate,
 							status: customer.customer_status,
+							total_fee: customer.total_fee,
+							total_park: customer.total_park_time,
+							TCKN: customer.TCKN,
+							fullName:customer.fullName
 						});
 					});
-					console.log(tempCustomers);
-					setUsers([...tempCustomers]);
+					setCustomers([...tempCustomers]);
 				}
 			} catch (error) {
 				console.error(error);
 			}
 		};
 		getAllUser();
-	}, []);
+	}, [modal]);
+
+
+
+	const exportTable = () =>{
+		const pdfArray = [];
+		const doc = new jsPDF();
+
+		customers.forEach(customer => {
+			let TCKN = customer.TCKN;
+			let fullName = customer.fullName;
+			let plate = customer.plate;
+			let total_fee = Math.round(customer.total_fee);
+			let total_park = Math.round( customer.total_park);
+			let park_status = customer.status ? "Active" : "Passive";
+			pdfArray.push([TCKN,fullName,plate,total_fee,total_park,park_status]);
+		});
+
+		autoTable(doc, {
+			theme:"grid",
+			styles:{cellPadding:{vertical:4,horizontal:2}},
+			head: [
+				[
+					"TCKN",
+					"Fullname",
+					"Plate",
+					"Total Fee",
+					"Total Park",
+					"Status",
+				],
+			],
+			body: pdfArray,
+		});
+
+		const currentDate = new Date();
+		doc.save(
+			"Customers." +
+				currentDate
+					.toLocaleString("tr-TR")
+					.replaceAll(" ", "_")
+					.replaceAll(":", ".") +
+				".pdf"
+		);
+		toast.success("Pdf Başarıyla Kaydedildi.")
+	}
 
 	return (
 		<div className="flex flex-col p-6">
-			<div className="pb-6">
-				<h1 className="text-2xl font-bold text-neutral-600">Users</h1>
-			</div>
-			{users.length === 0 ? (
+			<div className="pb-2 flex justify-between items-center pr-6">
+						<h1 className="text-2xl font-bold text-neutral-600">
+							Users
+						</h1>
+						<Tooltip placement="left" title="Export Table">
+							<IconButton
+						
+								size="large"
+								aria-label="fingerprint"
+								color="error"
+								onClick={exportTable}
+							>
+								<PictureAsPdfIcon style={{fontSize:40}}  />
+							</IconButton>
+						</Tooltip>
+					</div>
+			{customers.length === 0 ? (
 				<div className="font-bold text-muted">Loading...</div>
 			) : (
 				<div className="bg-slate-50">
 					<Box sx={{ height: 600, width: "100%" }}>
 						<DataGrid
-							rows={users}
+							rows={customers}
 							columns={columns}
 							initialState={{
 								pagination: {

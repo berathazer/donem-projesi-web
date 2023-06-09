@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import SpeedIcon from "@mui/icons-material/Speed";
 import Badge from "@mui/material/Badge";
 import SideLink from "./SideLink";
@@ -8,28 +8,32 @@ import BusinessIcon from "@mui/icons-material/Business";
 
 import PeopleIcon from "@mui/icons-material/People";
 import PersonAddIcon from "@mui/icons-material/PersonAdd";
-import LocalParkingIcon from '@mui/icons-material/LocalParking';
-import ReceiptIcon from '@mui/icons-material/Receipt';
-
+import LocalParkingIcon from "@mui/icons-material/LocalParking";
+import ReceiptIcon from "@mui/icons-material/Receipt";
 
 import { Link } from "react-router-dom";
 
 import { useDispatch } from "react-redux";
-import {actions as userActions} from "../../stores/user-store";
+import { actions as userActions } from "../../stores/user-store";
+
+import { toast } from "react-hot-toast";
 
 const SideBar = () => {
 	const dispatch = useDispatch();
+
 	const logoutHandler = () => {
 		localStorage.removeItem("token");
 		dispatch(userActions.logoutUser);
-	}
+	};
 
 	return (
 		<>
 			<div className="px-4 border-b border-gray-400 py-4 h-16 flex items-center">
 				<div className="flex w-full items-center gap-x-3">
 					<BusinessIcon fontSize="large" color="secondary" />
-					<span className="text-2xl font-semibold text-gray-600">Beracorp</span>
+					<span className="text-2xl font-semibold text-gray-600">
+						Beracorp
+					</span>
 				</div>
 			</div>
 
@@ -102,14 +106,33 @@ const SideBar = () => {
 			<div className="flex items-center w-full bottom-0 absolute border-t border-t-gray-100 gap-x-4 px-4 py-2 justify-between">
 				<div className="flex items-center justify-center gap-x-4">
 					<div className="flex items-center justify-center ">
-						<Avatar sx={{ bgcolor: "orange" }}>BH</Avatar>
+						<Avatar sx={{ bgcolor: "orange" }}>
+							{localStorage.getItem("fullName")
+								? localStorage
+										.getItem("fullName")
+										.split(" ")[0][0] +
+								  localStorage
+										.getItem("fullName")
+										.split(" ")[1][0]
+								: "BZ"}
+						</Avatar>
 					</div>
 					<div className="flex flex-col py-2">
-						<div className="text-sm text-gray-600 font-semibold">Berat Hazer</div>
-						<div className="text-xs font-semibold text-muted">System Admin</div>
+						<div className="text-sm text-gray-600 font-semibold">
+							{localStorage.getItem("fullName") ||
+								"Berat Hazer"}
+						</div>
+						<div className="text-xs font-semibold text-muted">
+							System Admin
+						</div>
 					</div>
 				</div>
-				<Link onClick={logoutHandler} to={"/login"} replace={false} className="cursor-pointer">
+				<Link
+					onClick={logoutHandler}
+					to={"/login"}
+					replace={false}
+					className="cursor-pointer"
+				>
 					<LogoutIcon color="secondary" />
 				</Link>
 			</div>

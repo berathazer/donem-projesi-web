@@ -23,6 +23,7 @@ router.get("/find-by-id", [apiMiddleware], customerController.findCustomerWithId
 //<POST>
 router.post("/new", [authMiddleware], customerController.addCustomer);
 router.post("/delete", [authMiddleware], customerController.deleteCustomer);
+router.post("/set-active", [authMiddleware], customerController.setStatusToActive);
 router.post("/update", [authMiddleware], customerController.updateCustomer);
 
 //</POST/>

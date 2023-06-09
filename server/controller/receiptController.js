@@ -2,7 +2,7 @@ import Receipt from "../model/receiptModel";
 
 const allReceipts = async (req, res) => {
 	try {
-		const receipts = await Receipt.find({});
+		const receipts = await Receipt.find({}).populate({path:"receipt_customer_id",select:"TCKN plate fullName"}).populate({path:"receipt_park_id",select:"entry_time exit_time"});
 
 		if (receipts.length == 0) {
 			return res.json({ success: false, error: "Henüz Hiç Araç Girişi Olmamış." });

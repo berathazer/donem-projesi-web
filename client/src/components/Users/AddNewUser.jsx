@@ -8,6 +8,7 @@ import axios from "axios";
 
 import { Card, Icon, Image } from "semantic-ui-react";
 import { toast } from "react-hot-toast";
+import { useNavigate } from "react-router-dom";
 
 const apiKey = "29b068e5f73f77da112c8aa6435993bb";
 const BASE_URL = "http://localhost:8000/api";
@@ -20,7 +21,7 @@ const AddNewUser = () => {
 		phone: "",
 		plate: "",
 	});
-
+	const navigate = useNavigate();
 	const clickHandler = async () => {
 		try {
 			const token = localStorage.getItem("token");
@@ -29,7 +30,9 @@ const AddNewUser = () => {
 			});
 
 			if (response.data.success) {
-				return toast.success(response.data.message);
+				
+				toast.success(response.data.message);
+				return navigate("/users",{replace: true});
 			}
 			return toast.error(response.data.error);
 		} catch (error) {

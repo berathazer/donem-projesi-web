@@ -8,12 +8,12 @@ const ReceiptSchema = new mongoose.Schema(
 		},
 		receipt_customer_id: {
 			type: mongoose.Schema.Types.ObjectId,
-			ref: "customers",
+			ref: "customer",
 			required: true,
 		},
 		receipt_park_id: {
 			type: mongoose.Schema.Types.ObjectId,
-			ref: "parks",
+			ref: "park",
 			required: true,
 		},
 		receipt_state:{
