@@ -78,11 +78,11 @@ const ReceiptsPage = () => {
 			width: 150,
 			renderCell: (params) => (
 				<span className="text-gray-500 font-semibold">
-					{new Date(
-						params.row.receipt_park_id.entry_time
-					).toLocaleString("tr-TR", {
-						timeZone: "Europe/Istanbul",
-					})}
+					{new Date(params.row.receipt_park_id.entry_time)
+						.toISOString()
+						.replace("Z", "")
+						.replace("T", " ")
+						.slice(0, -4)}
 				</span>
 			),
 		},
@@ -96,11 +96,11 @@ const ReceiptsPage = () => {
 			width: 150,
 			renderCell: (params) => (
 				<span className="text-gray-500 font-semibold">
-					{new Date(
-						params.row.receipt_park_id.exit_time
-					).toLocaleString("tr-TR", {
-						timeZone: "Europe/Istanbul",
-					})}
+					{new Date(params.row.receipt_park_id.exit_time)
+						.toISOString()
+						.replace("Z", "")
+						.replace("T", " ")
+						.slice(0, -4)}
 				</span>
 			),
 		},
@@ -151,18 +151,21 @@ const ReceiptsPage = () => {
 			const doc = new jsPDF();
 
 			receipts.forEach((receipt) => {
-			
-
 				let TCKN = receipt.receipt_customer_id.TCKN;
 				let fullName = receipt.receipt_customer_id.fullName;
 				let plate = receipt.receipt_customer_id.plate;
 				let receipt_fee = receipt.receipt_fee;
-				let entry_date = new Date(receipt.receipt_park_id.entry_time).toLocaleString("tr-TR", {
-					timeZone: "Europe/Istanbul",
-				});
-				let exit_date = new Date(receipt.receipt_park_id.exit_time).toLocaleString("tr-TR", {
-					timeZone: "Europe/Istanbul",
-				});
+				let entry_date = new Date(receipt.receipt_park_id.entry_time)
+					.toISOString()
+					.replace("Z", "")
+					.replace("T", " ")
+					.slice(0, -4);
+
+				let exit_date = new Date(receipt.receipt_park_id.exit_time)
+					.toISOString()
+					.replace("Z", "")
+					.replace("T", " ")
+					.slice(0, -4);
 				let receipt_status = receipt.recept_state ? "Active" : "Passive";
 
 				pdfArray.push([
@@ -172,7 +175,7 @@ const ReceiptsPage = () => {
 					receipt_fee,
 					entry_date,
 					exit_date,
-					receipt_status
+					receipt_status,
 				]);
 			});
 
@@ -187,7 +190,7 @@ const ReceiptsPage = () => {
 						"Amount",
 						"Entry Date",
 						"Exit Date",
-						"Park Status"
+						"Park Status",
 					],
 				],
 				body: pdfArray,

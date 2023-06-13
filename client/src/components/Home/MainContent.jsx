@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import LinearProgress from "@mui/material/LinearProgress";
 
 import Grid from "@mui/material/Grid";
@@ -11,8 +11,45 @@ import AreaChartComponent from "./AreaChartComponent";
 import PieChartComponent from "./PieChartComponent";
 
 import CountUp from "react-countup";
+import axios from "axios";
+import toast from "react-hot-toast";
+
+const apiKey = "29b068e5f73f77da112c8aa6435993bb";
+const BASE_URL = "http://localhost:8000/api";
 
 const MainContent = () => {
+	const [customerInfos, setCustomerInfos] = useState({
+		totalCustomer: 0,
+		totalCustomerReceipts: 0,
+		receiptFees: 0,
+		monthlyGoal: 10000,
+	});
+
+	useEffect(() => {
+		const fetchDatas = async () => {
+			try {
+				const results = await axios.get(
+					BASE_URL + "/customers?api_key=" + apiKey
+				);
+
+				if (!results.data.success) {
+					return toast.error(results.data.error);
+				}
+				console.log(results.data);
+				setCustomerInfos({
+					totalCustomer: results.data.totalCustomer,
+					totalCustomerReceipts: results.data.totalCustomerReceipts,
+					receiptFees: results.data.receiptFees,
+					monthlyGoal: results.data.monthlyGoal,
+				});
+			} catch (error) {
+				toast.error(error.message);
+			}
+		};
+		fetchDatas();
+		console.log(customerInfos);
+	}, []);
+
 	return (
 		<>
 			<div className="p-6">
@@ -36,7 +73,7 @@ const MainContent = () => {
 						<div className="flex items-center gap-x-2">
 							<CountUp
 								start={0}
-								end={188}
+								end={customerInfos.totalCustomer}
 								duration={2}
 								delay={0}
 							>
@@ -80,7 +117,7 @@ const MainContent = () => {
 						<div className="flex items-center gap-x-2">
 							<CountUp
 								start={0}
-								end={4125}
+								end={customerInfos.receiptFees}
 								duration={2}
 								delay={0}
 							>
@@ -124,7 +161,10 @@ const MainContent = () => {
 						<div className="flex items-center gap-x-2">
 							<CountUp
 								start={0}
-								end={13545}
+								end={
+									customerInfos.totalCustomerReceipts ||
+									1000
+								}
 								duration={2}
 								delay={0}
 							>
@@ -156,7 +196,7 @@ const MainContent = () => {
 							Monthly Goal
 						</div>
 						<div className="pb-2 text-lg font-semibold text-black/750">
-							$5.431 / $10.000
+							{`$${customerInfos.receiptFees} / $${customerInfos.monthlyGoal}`}
 						</div>
 						<div className="pt-2">
 							<LinearProgress
@@ -166,7 +206,7 @@ const MainContent = () => {
 									height: 10,
 								}}
 								valueBuffer={100}
-								value={54}
+								value={Math.round(customerInfos.receiptFees / customerInfos.monthlyGoal *100)}
 							/>
 						</div>
 					</div>
@@ -209,7 +249,7 @@ const MainContent = () => {
 								</div>
 							</div>
 							<div className="flex flex-col font-semibold items-center  justify-center ">
-							<div className="flex text-2xl font-bold text-black/70">
+								<div className="flex text-2xl font-bold text-black/70">
 									%
 									<CountUp
 										start={0}
@@ -234,7 +274,7 @@ const MainContent = () => {
 								</div>
 							</div>
 							<div className="flex flex-col font-semibold items-center  justify-center ">
-							<div className="flex text-2xl font-bold text-black/70">
+								<div className="flex text-2xl font-bold text-black/70">
 									%
 									<CountUp
 										start={0}

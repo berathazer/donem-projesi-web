@@ -20,6 +20,13 @@ const createNewPark = async (req, res) => {
 			});
 		}
 
+		if (customer.customer_status == 0){
+			return res.json({
+				success: false,
+				error: `${customer.fullName} kullanıcısı pasif durumda, sistemi kullanamaz.`,
+			});
+		}
+
 		const tempPark = await Park.findOne({
 			$and: [
 				{ customer_id: customerId },
@@ -58,7 +65,6 @@ const createNewPark = async (req, res) => {
 const exitThePark = async (req, res) => {
 	try {
 		const { plate } = req.body;
-		console.log(plate);
 		const park = await Park.findOne({
 			$and: [{ customer_plate: plate }, { park_state: 1 }],
 		});
@@ -90,7 +96,7 @@ const exitThePark = async (req, res) => {
 		const hourDiff = dateDiff / 60;
 
 		*/
-		const currentDate = new Date();
+		const currentDate = new Date().setUTCHours(new Date().getUTCHours() + 3);
 
 		const oldDate = new Date(park.entry_time);
 
@@ -99,16 +105,19 @@ const exitThePark = async (req, res) => {
 
 		// Tam saat sayısını almak için yuvarlama yapabilirsiniz
 		const roundedTimeDiffInHours = Math.round(timeDiffInHours);
-		let hourDiff = 0
-		if (roundedTimeDiffInHours <= 1){
-			hourDiff = 1
-		}else{
-			hourDiff = roundedTimeDiffInHours
+		let hourDiff = 0;
+		if (roundedTimeDiffInHours <= 1) {
+			hourDiff = 1;
+		} else {
+			hourDiff = roundedTimeDiffInHours;
 		}
+
 		//bu fee değeri ilerde hesaplanarak değiştirilecek şimdilik temsili bir değer. (+)
 		const fee =
 			parseInt(process.env.INITIAL_FEE) +
-			parseInt(process.env.INITIAL_FEE) * hourDiff;
+			parseInt(process.env.HOURLY_FEE) * parseInt(hourDiff);
+
+		console.log(fee, hourDiff,roundedTimeDiffInHours);
 
 		const newReceipt = await Receipt.create({
 			receipt_fee: fee,
@@ -118,7 +127,7 @@ const exitThePark = async (req, res) => {
 		newReceipt.save();
 
 		// park durumu 0 olucak ve receipt_id si güncellenecek
-		Park.findByIdAndUpdate(
+		const lastPark = await Park.findByIdAndUpdate(
 			park.id,
 			{
 				$set: {
@@ -130,29 +139,28 @@ const exitThePark = async (req, res) => {
 				},
 			},
 			{ new: true }
-		)
-			.then((updatedPark) => {
-				//şuanlık işlem yapılmasına gerek yok
-			})
-			.catch((error) => {
-				return res.json({ success: false, error: error.message });
-			});
+		);
+		if (!lastPark) {
+			return res.json({ success: false, error: "Unknown Error" });
+		}
 
 		// müşterinin total_time,total_fee bilgileri güncellenecek
-		Customer.findByIdAndUpdate(
+		const lastCustomer = await Customer.findByIdAndUpdate(
 			park.customer_id,
 			{ $inc: { total_park_time: hourDiff, total_fee: fee } },
 			{ new: true }
-		)
-			.then((updatedCustomer) => {
-				//şuanlık işlem yapılmasına gerek yok
-			})
-			.catch((error) => {
-				return res.json({ success: false, error: error.message });
-			});
+		);
 
-		// her şey tamamsa artık çıkışı yapıp fiş kesebiliriz.
-		return res.json({ success: true, receipt: newReceipt });
+		if (!lastCustomer) {
+			return res.json({ success: false, error: "Unknown Error" });
+		}
+
+		return res.json({
+			success: true,
+			receipt: newReceipt,
+			customer: lastCustomer,
+			park: lastPark,
+		});
 
 		// kapı açılacak.
 	} catch (error) {

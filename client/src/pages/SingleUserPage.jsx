@@ -12,7 +12,12 @@ const BASE_URL = "http://localhost:8000/api";
 
 const SingleUserPage = () => {
 	const { customerId } = useParams();
-	const [customer, setCustomer] = useState(null);
+	const [customer, setCustomer] = useState({
+		total_fee: 0,
+		total_park_time: 0,
+		maxPark: 0,
+		maxFee: 0,
+	});
 	const navigator = useNavigate();
 	const navigateHandler = () => {
 		navigator("/users/edit/" + customerId, { replace: true });
@@ -20,11 +25,20 @@ const SingleUserPage = () => {
 	useEffect(() => {
 		const fetchUser = async () => {
 			const response = await axios.get(
-				BASE_URL + "/customers/find-by-id?api_key=" + apiKey + "&id=" + customerId
+				BASE_URL +
+					"/customers/find-by-id?api_key=" +
+					apiKey +
+					"&id=" +
+					customerId
 			);
 
 			if (response.data.success) {
-				setCustomer({ ...response.data.customer });
+				setCustomer({
+					...response.data.customer,
+					maxPark: Math.round(response.data.maxPark),
+					maxFee: Math.round(response.data.maxFee),
+					total_fee: Math.round(response.data.customer.total_fee)
+				});
 			}
 		};
 		fetchUser();
@@ -73,50 +87,100 @@ const SingleUserPage = () => {
 								<Card.Group>
 									<Card>
 										<Card.Content>
-											<Card.Description>TCKN</Card.Description>
-											<Card.Meta className="opacity-0">-</Card.Meta>
-											<Card.Header> {customer?.TCKN}</Card.Header>
+											<Card.Description>
+												TCKN
+											</Card.Description>
+											<Card.Meta className="opacity-0">
+												-
+											</Card.Meta>
+											<Card.Header>
+												{" "}
+												{
+													customer?.TCKN
+												}
+											</Card.Header>
 										</Card.Content>
 									</Card>
 
 									<Card>
 										<Card.Content>
-											<Card.Description>Name</Card.Description>
-											<Card.Meta className="opacity-0">-</Card.Meta>
-											<Card.Header> {customer?.fullName}</Card.Header>
+											<Card.Description>
+												Name
+											</Card.Description>
+											<Card.Meta className="opacity-0">
+												-
+											</Card.Meta>
+											<Card.Header>
+												{" "}
+												{
+													customer?.fullName
+												}
+											</Card.Header>
 										</Card.Content>
 									</Card>
 
 									<Card>
 										<Card.Content>
-											<Card.Description>Mail</Card.Description>
-											<Card.Meta className="opacity-0">-</Card.Meta>
-											<Card.Header> {customer?.email}</Card.Header>
+											<Card.Description>
+												Mail
+											</Card.Description>
+											<Card.Meta className="opacity-0">
+												-
+											</Card.Meta>
+											<Card.Header>
+												{" "}
+												{
+													customer?.email
+												}
+											</Card.Header>
 										</Card.Content>
 									</Card>
 
 									<Card>
 										<Card.Content>
-											<Card.Description>Phone</Card.Description>
-											<Card.Meta className="opacity-0">-</Card.Meta>
-											<Card.Header> {customer?.phone}</Card.Header>
+											<Card.Description>
+												Phone
+											</Card.Description>
+											<Card.Meta className="opacity-0">
+												-
+											</Card.Meta>
+											<Card.Header>
+												{" "}
+												{
+													customer?.phone
+												}
+											</Card.Header>
 										</Card.Content>
 									</Card>
 
 									<Card>
 										<Card.Content>
-											<Card.Description>Plate</Card.Description>
-											<Card.Meta className="opacity-0">-</Card.Meta>
-											<Card.Header> {customer?.plate}</Card.Header>
+											<Card.Description>
+												Plate
+											</Card.Description>
+											<Card.Meta className="opacity-0">
+												-
+											</Card.Meta>
+											<Card.Header>
+												{" "}
+												{
+													customer?.plate
+												}
+											</Card.Header>
 										</Card.Content>
 									</Card>
 
 									<Card>
 										<Card.Content>
-											<Card.Description>Status</Card.Description>
-											<Card.Meta className="opacity-0">-</Card.Meta>
+											<Card.Description>
+												Status
+											</Card.Description>
+											<Card.Meta className="opacity-0">
+												-
+											</Card.Meta>
 											<Card.Header className="w-full">
-												{customer?.customer_status === 1 ? (
+												{customer?.customer_status ===
+												1 ? (
 													<span className="text-green-500 w-52 text-center font-semibold bg-green-200 px-2 py-1 rounded-md">
 														Active
 													</span>
@@ -134,10 +198,11 @@ const SingleUserPage = () => {
 											<span className="font-bold text-black/50 text-xl w-full">
 												<div className="flex flex-col justify-around p-5 bg-white rounded-md border  h-32 ">
 													<div className="uppercase font-bold text-xs text-gray-500">
-														Total Fee
+														Total
+														Fee
 													</div>
 													<div className="pb-2 text-lg font-semibold text-black/750">
-														$5.431 / $10.000
+														{`$${customer.total_fee} / $${customer.maxFee}`}
 													</div>
 													<div className="pt-2">
 														<LinearProgress
@@ -146,8 +211,14 @@ const SingleUserPage = () => {
 																borderRadius: 5,
 																height: 10,
 															}}
-															value={12}
-															valueBuffer={100}
+															value={Math.round(
+																(customer.total_fee /
+																	customer.maxFee) *
+																	100
+															)}
+															valueBuffer={
+																100
+															}
 														/>
 													</div>
 												</div>
@@ -160,10 +231,11 @@ const SingleUserPage = () => {
 											<span className="font-bold text-black/50 text-xl w-full">
 												<div className="flex flex-col justify-around p-5 bg-white rounded-md border  h-32 ">
 													<div className="uppercase font-bold text-xs text-gray-500">
-														Total Park
+														Total
+														Park
 													</div>
 													<div className="pb-2 text-lg font-semibold text-black/750">
-														$5.431 / $10.000
+														{`${customer.total_park_time} / ${customer.maxPark} Hours`}
 													</div>
 													<div className="pt-2">
 														<LinearProgress
@@ -172,8 +244,14 @@ const SingleUserPage = () => {
 																borderRadius: 5,
 																height: 10,
 															}}
-															value={12}
-															valueBuffer={100}
+															value={Math.round(
+																(customer.total_park_time /
+																	customer.maxPark) *
+																	100
+															)}
+															valueBuffer={
+																100
+															}
 														/>
 													</div>
 												</div>

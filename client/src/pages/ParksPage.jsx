@@ -17,8 +17,6 @@ import autoTable from "jspdf-autotable";
 const apiKey = "29b068e5f73f77da112c8aa6435993bb";
 const BASE_URL = "http://localhost:8000/api";
 
-
-
 const ParksPage = () => {
 	const [parks, setParks] = useState([]);
 
@@ -81,9 +79,7 @@ const ParksPage = () => {
 			width: 200,
 			renderCell: (params) => (
 				<span className="text-gray-500 font-semibold">
-					{new Date(params.row.entry_time).toLocaleString("tr-TR", {
-						timeZone: "Europe/Istanbul",
-					})}
+					{new Date(params.row.entry_time).toISOString().replace("Z","").replace("T"," ").slice(0,-4)}
 				</span>
 			),
 		},
@@ -108,28 +104,24 @@ const ParksPage = () => {
 	];
 
 	const exportTable = (e) => {
-		
 		const pdfArray = [];
+
 		const doc = new jsPDF();
-		
-		parks.forEach(park => {
-			console.log(park);
+
+		parks.forEach((park) => {
 			let TCKN = park.customer_id.TCKN;
 			let fullName = park.customer_id.fullName;
 			let plate = park.customer_plate;
-			let receipt = park.park_state ?  "0" : park.receipt_id?.receipt_fee ;
-			let entry_date = new Date(park.entry_time).toLocaleString("tr-TR", {
-				timeZone: "Europe/Istanbul",
-			});
-			console.log();
+			let receipt = park.park_state ? "0" : park.receipt_id?.receipt_fee;
+			let entry_date = new Date(park.entry_time).toISOString().replace("Z","").replace("T"," ").slice(0,-4);
 			let park_status = park.park_state ? "Active" : "Passive";
 
-			pdfArray.push([TCKN,fullName,plate,receipt,entry_date,park_status]);
+			pdfArray.push([TCKN, fullName, plate, receipt, entry_date, park_status]);
 		});
 
 		autoTable(doc, {
-			theme:"grid",
-			styles:{cellPadding:{vertical:4,horizontal:2}},
+			theme: "grid",
+			styles: { cellPadding: { vertical: 4, horizontal: 2 } },
 			head: [
 				[
 					"TCKN",
@@ -152,20 +144,29 @@ const ParksPage = () => {
 					.replaceAll(":", ".") +
 				".pdf"
 		);
-		toast.success("Pdf Başarıyla Kaydedildi.")
+
+		toast.success("Pdf Başarıyla Kaydedildi.");
 	};
 
 	useEffect(() => {
 		const fetchParks = async () => {
-			const response = await axios.get(BASE_URL + "/parks/?api_key=" + apiKey);
-			if (response.data.success) {
-				setParks([...response.data.allParks]);
-			} else {
-				console.log("fail:", response.data);
+			try {
+				const response = await axios.get(
+					BASE_URL + "/parks/?api_key=" + apiKey
+				);
+				if (response.data.success) {
+					setParks([...response.data.allParks]);
+					console.log(response.data);
+				} else {
+					console.log("fail:", response.data);
+				}
+			} catch (error) {
+				console.log(error.message);
 			}
 		};
 		fetchParks();
 	}, []);
+
 	return (
 		<div className="min-w-full min-h-screen flex  bg-login">
 			<div className="flex-2 flex-col  relative  bg-white">
@@ -179,13 +180,14 @@ const ParksPage = () => {
 						</h1>
 						<Tooltip placement="left" title="Export Table">
 							<IconButton
-								
 								size="large"
 								aria-label="fingerprint"
 								color="error"
 								onClick={exportTable}
 							>
-								<PictureAsPdfIcon style={{ fontSize: 40 }}/>
+								<PictureAsPdfIcon
+									style={{ fontSize: 40 }}
+								/>
 							</IconButton>
 						</Tooltip>
 					</div>

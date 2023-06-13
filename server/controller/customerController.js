@@ -56,6 +56,7 @@ const findCustomerWithPlate = async (req, res) => {
 		if (customer.length == 0) {
 			return res.json({ success: false, error: "Plaka sisteme kayıtlı değil." });
 		}
+
 		// müşteri bulunmuştur artık döndürebiliriz.
 		return res.json({ success: true, customer: customer });
 	} catch (error) {
@@ -77,15 +78,24 @@ const findCustomerWithId = async (req, res) => {
 				error: "Böyle bir kullanıcı kayıtlı değil.",
 			});
 		}
+
+		const maxPark = await Customer.findOne({})
+			.sort({ total_park_time: -1 }) // total_park_time'a göre sıralanır (en yüksekten en düşüğe)
+			.exec();
+
 		// müşteri bulunmuştur artık döndürebiliriz.
-		return res.json({ success: true, customer: customer });
+		return res.json({
+			success: true,
+			customer: customer,
+			maxPark: maxPark.total_park_time,
+			maxFee: maxPark.total_fee,
+		});
 	} catch (error) {
 		return res.json({ success: false, error: error.message });
 	}
 };
 
 const deleteCustomer = async (req, res) => {
-	
 	try {
 		const { customerId } = req.body;
 
@@ -187,7 +197,43 @@ const updateCustomer = async (req, res) => {
 const allCustomer = async (req, res) => {
 	try {
 		const customers = await Customer.find({}, {});
-		return res.json({ success: true, customers: customers });
+
+		//const receipts = await Receipt.find({}, {});
+
+		const result = await Receipt.aggregate([
+			{
+				$group: {
+					_id: null,
+					totalReceiptFee: { $sum: "$receipt_fee" },
+				},
+			},
+		]).exec();
+
+		const receiptFees = result[0].totalReceiptFee;
+
+		Customer.aggregate([
+			{
+				$group: {
+					_id: null,
+					totalCustomerReceipts: { $sum: "$total_fee" },
+				},
+			},
+		])
+			.exec()
+			.then((result) => {
+				const totalCustomerReceipts = result[0].totalCustomerReceipts;
+				return res.json({
+					success: true,
+					customers: customers,
+					totalCustomer: customers.length,
+					totalCustomerReceipts: totalCustomerReceipts,
+					receiptFees: receiptFees,
+					monthlyGoal: parseInt(process.env.MONTHLY_GOAL),
+				});
+			})
+			.catch((error) => {
+				return res.json({ success: false, error: error.message });
+			});
 	} catch (error) {
 		return res.json({ success: false, error: error.message });
 	}
@@ -237,5 +283,5 @@ export default {
 	allCustomer,
 	activeCustomers,
 	passiveCustomers,
-	setStatusToActive
+	setStatusToActive,
 };

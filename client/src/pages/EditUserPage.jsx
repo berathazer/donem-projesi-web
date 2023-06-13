@@ -82,7 +82,7 @@ const EditUserPage = () => {
 				<div className="flex flex-col p-6">
 					<div className="pb-6">
 						<h1 className="text-2xl font-bold text-neutral-600">
-							Edit : {customerId}
+							Edit : {formData.TCKN || customerId}
 						</h1>
 					</div>
 					<div className="bg-white p-6 rounded-md ">
